@@ -1,16 +1,11 @@
 "use client"
 
-import { Button } from "@/components/ui/button";
-import {
-  SignInButton,
-  SignOutButton,
-  SignedIn,
-  SignedOut,
-  useOrganization,
-  useUser,
-} from "@clerk/nextjs";
-import { useMutation, useQueries, useQuery } from "convex/react";
+import { useOrganization, useUser } from "@clerk/nextjs";
+
+import { useMutation, useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
+
+import { Button } from "@/components/ui/button";
 
 export default function Home() {
   const organization = useOrganization()
