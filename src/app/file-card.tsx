@@ -22,13 +22,14 @@ import {
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 
-import { Doc } from "../../convex/_generated/dataModel";
+import { Doc, Id } from "../../convex/_generated/dataModel";
 import { Button } from "@/components/ui/button";
-import { EllipsisVertical, TrashIcon } from "lucide-react";
-import { useState } from "react";
-import { useMutation } from "convex/react";
+import { EllipsisVertical, File, FileJson, FileText, FileTextIcon, GanttChart, GanttChartIcon, ImageIcon, TrashIcon } from "lucide-react";
+import { ReactNode, useEffect, useState } from "react";
+import { useMutation, useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { useToast } from "@/components/ui/use-toast";
+import Image from "next/image";
 
 function FileCardActions({ file }: { file: Doc<"files"> }) {
     const deleteFile = useMutation(api.files.deleteFile)
@@ -77,23 +78,50 @@ function FileCardActions({ file }: { file: Doc<"files"> }) {
 
 }
 
+
+
+
 export default function FileCard({ file }: { file: Doc<"files"> }) {
+
+    let fileURL = useQuery(api.files.getFileURL, file.fileId ? { fileId: file.fileId } : 'skip')
+
+    if (!fileURL) {
+        fileURL = ""
+    }
+
+    const typeIcon = {
+        image: <ImageIcon />,
+        pdf: <File />,
+        txt: <FileText />,
+        csv: <FileJson />,
+    } as Record<Doc<"files">["type"], ReactNode>
+
     return (
         <Card>
             <CardHeader className="relative">
-                <CardTitle className="whitespace-pre">
-                    {file.name}
+                <CardTitle className="flex gap-2 whitespace-pre max-sm:text-md">
+                    {typeIcon[file.type]} {" "} {file.name}
                 </CardTitle>
                 <div className="absolute top-3 right-3">
                     <FileCardActions file={file} />
                 </div>
             </CardHeader>
-            <CardContent>
-                <p>Card Content</p>
+            <CardContent className="h-36 flex justify-center items-center">
+                {file.type === 'image' &&
+                    <Image
+                        alt={file.name}
+                        src={fileURL}
+                        width={250}
+                        height={250}
+                    />
+                }
+                {file.type === 'csv' && <FileJson className="w-20 h-20" />}
+                {file.type === 'pdf' && <File className="w-20 h-20" />}
+                {file.type === 'txt' && <FileText className="w-20 h-20" />}
             </CardContent>
-            <CardFooter>
+            <CardFooter className="flex justify-end">
                 <Button>Download</Button>
             </CardFooter>
-        </Card>
+        </Card >
     );
 }
