@@ -119,8 +119,10 @@ export default function FileCard({ file }: { file: Doc<"files"> }) {
                 {file.type === 'pdf' && <File className="w-20 h-20" />}
                 {file.type === 'txt' && <FileText className="w-20 h-20" />}
             </CardContent>
-            <CardFooter className="flex justify-end">
-                <Button>Download</Button>
+            <CardFooter className="flex justify-center">
+                <Button onClick={() => {
+                    window.open(fileURL, "_blank")
+                }}>Download</Button>
             </CardFooter>
         </Card >
     );
