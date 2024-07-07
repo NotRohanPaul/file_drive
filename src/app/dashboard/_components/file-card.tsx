@@ -25,7 +25,7 @@ import {
 
 import { Doc, Id } from "../../../../convex/_generated/dataModel";
 import { Button } from "@/components/ui/button";
-import { Check, EllipsisVertical, File, FileJson, FileText, ImageIcon, Star, StarHalf, StarIcon, Stars, StarsIcon, TrashIcon } from "lucide-react";
+import { Check, EllipsisVertical, File, FileCog, FileJson, FileText, ImageIcon, Star, StarHalf, StarIcon, Stars, StarsIcon, TrashIcon } from "lucide-react";
 import { ReactNode, useState } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
@@ -115,6 +115,7 @@ export default function FileCard({ file, favorites }: { file: Doc<"files">; favo
         pdf: <File />,
         txt: <FileText />,
         csv: <FileJson />,
+        other: <FileCog />,
     } as Record<Doc<"files">["type"], ReactNode>
 
     const isFavourite = favorites?.some(favorite => favorite.fileId === file._id)
@@ -147,6 +148,7 @@ export default function FileCard({ file, favorites }: { file: Doc<"files">; favo
                 {file.type === 'csv' && <FileJson className="w-20 h-20" />}
                 {file.type === 'pdf' && <File className="w-20 h-20" />}
                 {file.type === 'txt' && <FileText className="w-20 h-20" />}
+                {file.type === 'other' && <FileCog className="w-20 h-20" />}
             </CardContent>
             <CardFooter className="flex justify-center">
                 <Button onClick={() => {

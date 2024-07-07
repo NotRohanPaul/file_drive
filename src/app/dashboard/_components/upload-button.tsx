@@ -49,7 +49,7 @@ export default function UploadButton() {
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
         const postUrl = await generateUploadUrl();
-        const fileType = values.file[0].type
+        const fileType = values.file[0].type || "application/other"
 
         const result = await fetch(postUrl, {
             method: "POST",
@@ -65,6 +65,7 @@ export default function UploadButton() {
             'application/pdf': "pdf",
             'text/plain': "txt",
             'text/csv': "csv",
+            "application/other": "other",
         } as Record<string, Doc<"files">["type"]>
 
         try {
