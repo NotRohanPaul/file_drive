@@ -9,7 +9,8 @@ import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuTrigger,
-    DropdownMenuItem
+    DropdownMenuItem,
+    DropdownMenuSeparator
 } from "@/components/ui/dropdown-menu"
 import {
     AlertDialog,
@@ -22,17 +23,18 @@ import {
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 
-import { Doc, Id } from "../../convex/_generated/dataModel";
+import { Doc, Id } from "../../../../convex/_generated/dataModel";
 import { Button } from "@/components/ui/button";
-import { EllipsisVertical, File, FileJson, FileText, FileTextIcon, GanttChart, GanttChartIcon, ImageIcon, TrashIcon } from "lucide-react";
-import { ReactNode, useEffect, useState } from "react";
+import { EllipsisVertical, File, FileJson, FileText, ImageIcon, StarIcon, TrashIcon } from "lucide-react";
+import { ReactNode, useState } from "react";
 import { useMutation, useQuery } from "convex/react";
-import { api } from "../../convex/_generated/api";
+import { api } from "../../../../convex/_generated/api";
 import { useToast } from "@/components/ui/use-toast";
 import Image from "next/image";
 
 function FileCardActions({ file }: { file: Doc<"files"> }) {
     const deleteFile = useMutation(api.files.deleteFile)
+    const toggleFavourite = useMutation(api.files.toggleFavourite)
     const [isConfirmOpen, setIsConfirmOpen] = useState(false)
     const { toast } = useToast()
 
@@ -52,7 +54,7 @@ function FileCardActions({ file }: { file: Doc<"files"> }) {
                         <AlertDialogAction onClick={async () => {
                             await deleteFile({ fileId: file._id, })
                             toast({
-                                variant: "default",
+                                variant: "destructive",
                                 title: "File Deleted",
                                 description: "Your file is permanently deleted from our server",
                             })
@@ -65,14 +67,25 @@ function FileCardActions({ file }: { file: Doc<"files"> }) {
                 <DropdownMenuTrigger><EllipsisVertical /></DropdownMenuTrigger>
                 <DropdownMenuContent onCloseAutoFocus={(e) => e.preventDefault()}>
                     <DropdownMenuItem
+                        className="flex items-center gap-1 text-yellow-600 cursor-pointer"
+                        onClick={() => toggleFavourite({ fileId: file._id })}
+                    >
+                        <StarIcon className="w-4 h-4" />
+                        Favorite
+                    </DropdownMenuItem>
+
+                    <DropdownMenuSeparator />
+
+                    <DropdownMenuItem
                         className="flex items-center gap-1 text-red-600 cursor-pointer"
                         onClick={() => setIsConfirmOpen(true)}
                     >
                         <TrashIcon className="w-4 h-4" />
                         Delete
                     </DropdownMenuItem>
+
                 </DropdownMenuContent>
-            </DropdownMenu>
+            </DropdownMenu >
         </>
     )
 
@@ -106,14 +119,19 @@ export default function FileCard({ file }: { file: Doc<"files"> }) {
                     <FileCardActions file={file} />
                 </div>
             </CardHeader>
-            <CardContent className="h-36 flex justify-center items-center">
+            <CardContent className="h-36 flex justify-center items-center w-auto">
                 {file.type === 'image' &&
-                    <Image
+                    (fileURL ? <Image
                         alt={file.name}
                         src={fileURL}
                         width={250}
                         height={250}
+                        style={{ width: "auto", height: "auto" }}
+                        priority
                     />
+                        :
+                        file.name
+                    )
                 }
                 {file.type === 'csv' && <FileJson className="w-20 h-20" />}
                 {file.type === 'pdf' && <File className="w-20 h-20" />}

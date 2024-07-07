@@ -3,7 +3,6 @@ import ConvexClientProvider from "./ConvexClientProvider";
 
 import { Inter } from "next/font/google";
 
-import Header from "./header";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 
@@ -19,11 +18,12 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+
+
   return (
     <html lang="en">
       <body className={inter.className}>
         <ConvexClientProvider>
-          <Header />
           {children}
           <Toaster />
         </ConvexClientProvider>
