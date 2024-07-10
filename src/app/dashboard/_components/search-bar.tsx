@@ -36,7 +36,7 @@ export default function SearchBar({ query, setQuery }: { query: string, setQuery
                     render={({ field }) => (
                         <FormItem>
                             <FormControl>
-                                <Input  {...field} className="w-[30vw] rounded-sm focus-visible:ring-0 focus-visible:outline focus-visible:outline-2" placeholder="Your file name" />
+                                <Input  {...field} className="w-[10vw] rounded-sm focus-visible:ring-0 focus-visible:outline focus-visible:outline-2" placeholder="Your file name" />
                             </FormControl>
                         </FormItem>
                     )}
@@ -48,7 +48,7 @@ export default function SearchBar({ query, setQuery }: { query: string, setQuery
                     {form.formState.isSubmitting && (
                         <Loader2 className="h-4 w-4 animate-spin" />
                     )}
-                    <SearchIcon className="p-0 w-4 h-4" />Search
+                    <SearchIcon className="p-0 w-4 h-4" />
                 </Button>
             </form>
         </Form>

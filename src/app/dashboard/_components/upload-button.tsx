@@ -51,8 +51,7 @@ export default function UploadButton() {
         const postUrl = await generateUploadUrl();
         let fileType = values.file[0].type
 
-        const isValidFileType = ['image', 'csv', 'pdf', 'txt', 'other'].includes(fileType);
-        if (!isValidFileType) {
+        if (!fileType) {
             fileType = 'application/other';
         }
 
@@ -76,7 +75,7 @@ export default function UploadButton() {
         try {
             await createFile({
                 name: values.title,
-                type: types[fileType],
+                type: types[fileType] || "other",
                 fileId: storageId,
                 orgId,
             })

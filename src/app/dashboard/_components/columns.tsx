@@ -24,7 +24,7 @@ export const columns: ColumnDef<Doc<"files"> & { isFavorited: boolean }>[] = [
         header: "Type",
     },
     {
-        header: 'User',
+        header: "User",
         cell: ({ row }) => {
             return (
                 <UserCell userId={row.original.userId} />

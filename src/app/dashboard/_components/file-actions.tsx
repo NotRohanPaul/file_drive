@@ -124,11 +124,10 @@ export function FileCardActions({ file, isFavorited }: { file: Doc<"files">, isF
                                         <StarIcon className="w-4 h-4" /> Favorite
                                     </>
                                 }
-
                             </DropdownMenuItem>
 
                             <Protect
-                                condition={has => has({ role: "org:admin" }) || auth.orgId === null}
+                                condition={has => has({ role: "org:admin" }) || auth.userId === file.orgId}
                                 fallback={<></>}
                             >
                                 <DropdownMenuSeparator />
