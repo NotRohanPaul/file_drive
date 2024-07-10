@@ -49,7 +49,12 @@ export default function UploadButton() {
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
         const postUrl = await generateUploadUrl();
-        const fileType = values.file[0].type || "application/other"
+        let fileType = values.file[0].type
+
+        const isValidFileType = ['image', 'csv', 'pdf', 'txt', 'other'].includes(fileType);
+        if (!isValidFileType) {
+            fileType = 'application/other';
+        }
 
         const result = await fetch(postUrl, {
             method: "POST",

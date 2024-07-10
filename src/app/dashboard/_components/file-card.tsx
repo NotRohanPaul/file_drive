@@ -22,22 +22,52 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+import {
+    Avatar,
+    AvatarFallback,
+    AvatarImage
+} from "@/components/ui/avatar";
 
-import { Doc, Id } from "../../../../convex/_generated/dataModel";
-import { Button } from "@/components/ui/button";
-import { Check, EllipsisVertical, File, FileCog, FileJson, FileText, ImageIcon, Star, StarHalf, StarIcon, Stars, StarsIcon, TrashIcon } from "lucide-react";
+import {
+    Check,
+    Download,
+    EllipsisVertical,
+    File,
+    FileCog,
+    FileJson,
+    FileText,
+    ImageIcon,
+    StarIcon,
+    TrashIcon,
+    UndoIcon
+} from "lucide-react";
+
+import { formatRelative } from 'date-fns'
+
+import { Doc } from "../../../../convex/_generated/dataModel";
 import { ReactNode, useState } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { useToast } from "@/components/ui/use-toast";
 import Image from "next/image";
 import { Protect } from "@clerk/nextjs";
+import { useAuth } from "@clerk/clerk-react";
+
 
 function FileCardActions({ file, isFavourite }: { file: Doc<"files">, isFavourite?: Boolean }) {
     const deleteFile = useMutation(api.files.deleteFile)
+    const restoreFile = useMutation(api.files.restoreFile)
     const toggleFavourite = useMutation(api.files.toggleFavourite)
+
+    const auth = useAuth()
     const [isConfirmOpen, setIsConfirmOpen] = useState(false)
     const { toast } = useToast()
+
+    let fileURL = useQuery(api.files.getFileURL, file.fileId ? { fileId: file.fileId } : 'skip')
+    if (!fileURL) {
+        fileURL = ""
+    }
+
 
 
     return (
@@ -47,7 +77,7 @@ function FileCardActions({ file, isFavourite }: { file: Doc<"files">, isFavourit
                     <AlertDialogHeader>
                         <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                         <AlertDialogDescription>
-                            This action cannot be undone. This will permanently delete your file from our servers.
+                            This action will mark the file for deletion process. Files are deleted preodically.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter >
@@ -56,8 +86,8 @@ function FileCardActions({ file, isFavourite }: { file: Doc<"files">, isFavourit
                             await deleteFile({ fileId: file._id, })
                             toast({
                                 variant: "destructive",
-                                title: "File Deleted",
-                                description: "Your file is permanently deleted from our server",
+                                title: "File marked for deletion",
+                                description: "Your file will be deleted soon.",
                             })
                         }}>Continue</AlertDialogAction>
                     </AlertDialogFooter>
@@ -68,52 +98,97 @@ function FileCardActions({ file, isFavourite }: { file: Doc<"files">, isFavourit
                 <DropdownMenuTrigger><EllipsisVertical /></DropdownMenuTrigger>
                 <DropdownMenuContent onCloseAutoFocus={(e) => e.preventDefault()}>
                     <DropdownMenuItem
-                        className="flex items-center gap-1 text-yellow-600 cursor-pointer"
-                        onClick={() => toggleFavourite({ fileId: file._id })}
-                    >
-                        {isFavourite ?
-                            <>
-                                <Check className="w-4 h-4" /> Unfavorite
-                            </>
-                            :
-                            <>
-                                <StarIcon className="w-4 h-4" /> Favorite
-                            </>
-                        }
-
+                        className="flex items-center gap-1 text-black cursor-pointer"
+                        onClick={() => {
+                            window.open(fileURL, "_blank")
+                        }}>
+                        <Download className="w-4 h-4" />
+                        Download
                     </DropdownMenuItem>
 
-                    <Protect
-                        role="org:admin"
-                        fallback={<></>}
-                    >
-                        <DropdownMenuSeparator />
+
+
+                    {file.shouldDelete ?
                         <DropdownMenuItem
-                            className="flex items-center gap-1 text-red-600 cursor-pointer"
-                            onClick={() => setIsConfirmOpen(true)}
+                            className="flex items-center gap-1 text-green-600 cursor-pointer"
+                            onClick={
+                                async () => {
+                                    await restoreFile({ fileId: file._id, })
+                                    toast({
+                                        variant: "success",
+                                        title: "File is successfully restored",
+                                        description: "Your file is restored from trash.",
+                                    })
+                                }
+                            }
                         >
-                            <TrashIcon className="w-4 h-4" />
-                            Delete
+                            <>
+                                <UndoIcon className="w-4 h-4" />
+                                Restore
+                            </>
                         </DropdownMenuItem>
-                    </Protect>
+                        :
+                        <>
+                            <DropdownMenuItem
+                                className="flex items-center gap-1 text-yellow-600 cursor-pointer"
+                                onClick={() => toggleFavourite({ fileId: file._id })}
+                            >
+                                {isFavourite ?
+                                    <>
+                                        <Check className="w-4 h-4" /> Unfavorite
+                                    </>
+                                    :
+                                    <>
+                                        <StarIcon className="w-4 h-4" /> Favorite
+                                    </>
+                                }
+
+                            </DropdownMenuItem>
+
+                            <Protect
+                                condition={has => has({ role: "org:admin" }) || auth.orgId === null}
+                                fallback={<></>}
+                            >
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem
+                                    className="flex items-center gap-1 text-red-600 cursor-pointer"
+                                    onClick={() => {
+                                        setIsConfirmOpen(true)
+
+                                    }
+                                    }
+                                >
+                                    <>
+                                        <TrashIcon className="w-4 h-4" />
+                                        Delete
+                                    </>
+                                </DropdownMenuItem>
+                            </Protect>
+                        </>
+                    }
+
+
                 </DropdownMenuContent>
+
             </DropdownMenu >
         </>
     )
-
 }
 
 
-
-
-export default function FileCard({ file, favorites }: { file: Doc<"files">; favorites?: Doc<"favorites">[]; }) {
+export default function FileCard({
+    file,
+    favorites
+}: {
+    file: Doc<"files">;
+    favorites?: Doc<"favorites">[];
+}) {
 
     let fileURL = useQuery(api.files.getFileURL, file.fileId ? { fileId: file.fileId } : 'skip')
+    if (!fileURL) fileURL = ""
 
-    if (!fileURL) {
-        fileURL = ""
-    }
-
+    const isFavourite = favorites?.some(favorite => favorite.fileId === file._id)
+    const userProfile = useQuery(api.users.getUserProfile, { userId: file.userId });
     const typeIcons = {
         image: <ImageIcon />,
         pdf: <File />,
@@ -122,14 +197,16 @@ export default function FileCard({ file, favorites }: { file: Doc<"files">; favo
         other: <FileCog />,
     } as Record<Doc<"files">["type"], ReactNode>
 
-    const isFavourite = favorites?.some(favorite => favorite.fileId === file._id)
-
-
     return (
         <Card>
             <CardHeader className="relative">
-                <CardTitle className="flex gap-2 whitespace-pre max-sm:text-md">
-                    {typeIcons[file.type]} {" "} {file.name}
+                <CardTitle className="flex items-center gap-2 max-sm:text-md text-2xl font-normal">
+                    <span>
+                        {typeIcons[file.type]}
+                    </span>
+                    <span className="w-[80%] overflow-hidden text-nowrap text-ellipsis">
+                        {file.name}
+                    </span>
                 </CardTitle>
                 <div className="absolute top-3 right-3">
                     <FileCardActions isFavourite={isFavourite} file={file} />
@@ -154,10 +231,17 @@ export default function FileCard({ file, favorites }: { file: Doc<"files">; favo
                 {file.type === 'txt' && <FileText className="w-20 h-20" />}
                 {file.type === 'other' && <FileCog className="w-20 h-20" />}
             </CardContent>
-            <CardFooter className="flex justify-center">
-                <Button onClick={() => {
-                    window.open(fileURL, "_blank")
-                }}>Download</Button>
+            <CardFooter className="flex justify-between items-center">
+                <div className="flex justify-left gap-2 text-sm text-gray-700">
+                    <Avatar className="w-5 h-5 ring-1 ring-black">
+                        <AvatarImage src={userProfile?.image} />
+                        <AvatarFallback>User</AvatarFallback>
+                    </Avatar>
+                    {userProfile?.name}
+                </div>
+                <div className="text-sm text-gray-700">
+                    Uploaded {formatRelative(new Date(file._creationTime), new Date())}
+                </div>
             </CardFooter>
         </Card >
     );
