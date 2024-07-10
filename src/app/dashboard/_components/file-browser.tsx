@@ -9,8 +9,11 @@ import UploadButton from "./upload-button";
 import FileCard from "./file-card";
 import SearchBar from "./search-bar"
 import Image from "next/image";
-import { Loader2 } from "lucide-react";
+import { Grid, Loader2, TableProperties } from "lucide-react";
 import { useState } from "react";
+import { DataTable } from "./file-table";
+import { columns } from "./columns";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 
 function PlaceHolder() {
@@ -21,12 +24,39 @@ function PlaceHolder() {
         alt="empty files"
         width={300}
         height={300}
+        style={{ width: "auto", height: "auto" }}
       />
       <p className="text-2xl max-sm:text-sm text-center">
         You have no files to upload a file use the upload button
       </p>
       <UploadButton />
     </div>
+  )
+}
+
+function Views({ modifiedFiles }: { modifiedFiles: any }) {
+  return (
+    <Tabs defaultValue={localStorage.view === 'table' ? "table-view" : "card-view"} className="flex flex-col mt-5">
+      <TabsList className="self-end">
+        <TabsTrigger value="card-view" onClick={() => localStorage.view = "card"}>
+          <Grid />
+        </TabsTrigger>
+        <TabsTrigger value="table-view" onClick={() => localStorage.view = "table"}>
+          <TableProperties />
+        </TabsTrigger>
+      </TabsList>
+
+      <TabsContent value="card-view">
+        <div className="w-full grid grid-cols-[repeat(auto-fill,_minmax(300px,_1fr))] gap-5 max-sm:flex max-sm:flex-col">
+          {modifiedFiles?.map((file) => {
+            return <FileCard key={file._id} file={file} />
+          })}
+        </div>
+      </TabsContent>
+      <TabsContent value="table-view">
+        <DataTable columns={columns} data={modifiedFiles} />
+      </TabsContent>
+    </Tabs>
   )
 }
 
@@ -54,6 +84,17 @@ export default function FileBrowser(
 
   const isLoading = files === undefined
 
+  const modifiedFiles =
+    files?.map(
+      (file) => JSON.parse(JSON.stringify({
+        ...file,
+        isFavorited: (favorites ?? []).some(
+          (favorite) => favorite.fileId === file._id
+        ),
+      }))
+    ) ?? [];
+
+
   return (<div className="w-full" >
     {!user.isSignedIn ?
       (
@@ -64,36 +105,23 @@ export default function FileBrowser(
       )
       :
       (
-        <div>
-          {isLoading &&
+        <>
+          <div className="flex flex-wrap justify-between items-center">
+            <h1 className="text-3xl max-sm:text-xl font-bold">{title}</h1>
+            <SearchBar query={query} setQuery={setQuery} />
+            <UploadButton />
+          </div>
+
+          {isLoading ?
             <div className="w-full h-[60vh] flex flex-col items-center justify-center">
               <Loader2 className="w-32 h-32 animate-spin text-gray-700" />
               <p className="text-2xl max-sm:text-sm font-bold ml-5">Loading...</p>
             </div>
+            :
+            files?.length === 0 ? <PlaceHolder /> : <Views modifiedFiles={modifiedFiles} />
           }
-
-          {!isLoading &&
-            <>
-              <div className="flex flex-wrap justify-between items-center">
-                <h1 className="text-3xl max-sm:text-xl font-bold">{title}</h1>
-                <SearchBar query={query} setQuery={setQuery} />
-                <UploadButton />
-              </div>
-
-              {files?.length === 0 &&
-                <PlaceHolder />
-              }
-
-              <div className="w-full grid grid-cols-[repeat(auto-fill,_minmax(300px,_1fr))] gap-5 mt-4 max-sm:flex max-sm:flex-col">
-                {files?.map((file) => {
-                  return <FileCard favorites={favorites} key={file._id} file={file} />
-                })}
-              </div>
-            </>
-          }
-        </div>
+        </>
       )
     }
-  </div >
-  )
+  </div >)
 }

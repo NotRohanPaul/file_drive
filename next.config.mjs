@@ -5,6 +5,7 @@ const nextConfig = {
         remotePatterns: [
             {
                 hostname: 'elated-wren-402.convex.cloud',
+
             }
         ]
     }

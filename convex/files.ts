@@ -139,7 +139,7 @@ export const getFileURL = query({
     },
 });
 
-export const toggleFavourite = mutation({
+export const toggleFavorite = mutation({
     args: { fileId: v.id("files") },
     async handler(ctx, args) {
         const access = await hasAccessToFile(ctx, args.fileId)
@@ -148,12 +148,12 @@ export const toggleFavourite = mutation({
             throw new ConvexError("No access to file")
         }
 
-        const favourite = await ctx.db.query('favorites')
+        const favorite = await ctx.db.query('favorites')
             .withIndex('by_userId_orgId_fileId',
                 q => q.eq("userId", access.user._id).eq("orgId", access.file.orgId).eq("fileId", access.file._id))
             .first()
 
-        if (!favourite) {
+        if (!favorite) {
             await ctx.db.insert('favorites', {
                 userId: access.user._id,
                 orgId: access.file.orgId,
@@ -161,7 +161,7 @@ export const toggleFavourite = mutation({
             })
         }
         else {
-            await ctx.db.delete(favourite._id)
+            await ctx.db.delete(favorite._id)
         }
     }
 })

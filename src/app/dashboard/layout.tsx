@@ -12,7 +12,7 @@ export default function DashboardLayout({
             <header>
                 <Header />
             </header>
-            <main className="container mx-auto pt-12 min-h-screen">
+            <main className="container mx-auto pt-12">
 
                 <div className="flex gap-8">
                     <SideNav />
