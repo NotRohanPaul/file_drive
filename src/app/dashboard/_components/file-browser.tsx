@@ -88,28 +88,30 @@ export default function FileBrowser(
           </div>
 
           <Tabs defaultValue={localStorage.view === 'table' ? "table-view" : "card-view"} className="flex flex-col mt-5 ">
-            <TabsList className="self-end px-0 mb-2">
+            <div className="flex justify-end">
               <SearchBar query={query} setQuery={setQuery} />
-              <TabsTrigger value="card-view" className="ml-5 p-2" onClick={() => { localStorage.view = "card" }}>
-                <Grid />
-              </TabsTrigger>
-              <TabsTrigger value="table-view" className="mr-5 p-2" onClick={() => { localStorage.view = "table" }}>
-                <TableProperties />
-              </TabsTrigger>
-              <Select value={type} onValueChange={(e) => setType(e as any)}>
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All</SelectItem>
-                  <SelectItem value="image">Images</SelectItem>
-                  <SelectItem value="csv">CSVs</SelectItem>
-                  <SelectItem value="pdf">PDFs</SelectItem>
-                  <SelectItem value="txt">TXTs</SelectItem>
-                  <SelectItem value="other">Other</SelectItem>
-                </SelectContent>
-              </Select>
-            </TabsList>
+              <TabsList className="self-end px-0 mb-2">
+                <TabsTrigger value="card-view" className="ml-5 p-2" onClick={(): void => { localStorage.view = "card" }}>
+                  <Grid />
+                </TabsTrigger>
+                <TabsTrigger value="table-view" className="mr-5 p-2" onClick={(): void => { localStorage.view = "table" }}>
+                  <TableProperties />
+                </TabsTrigger>
+                <Select value={type} onValueChange={(e) => setType(e as any)}>
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All</SelectItem>
+                    <SelectItem value="image">Images</SelectItem>
+                    <SelectItem value="csv">CSVs</SelectItem>
+                    <SelectItem value="pdf">PDFs</SelectItem>
+                    <SelectItem value="txt">TXTs</SelectItem>
+                    <SelectItem value="other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+              </TabsList>
+            </div>
 
             {isLoading ?
               <div className="w-full h-[60vh] flex flex-col items-center justify-center">

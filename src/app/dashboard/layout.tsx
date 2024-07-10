@@ -1,3 +1,4 @@
+import { Footer } from "./footer";
 import Header from "./header";
 import { SideNav } from "./side-nav";
 
@@ -18,6 +19,9 @@ export default function DashboardLayout({
                     <div className="w-full">{children}</div>
                 </div>
             </main >
+            <footer>
+                <Footer />
+            </footer>
         </>
     );
 }
