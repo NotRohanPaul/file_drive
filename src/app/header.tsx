@@ -23,7 +23,7 @@ export default function Header() {
                 </SignInButton>
             </SignedOut>
             <SignedIn>
-                <SignOutButton redirectUrl="/dashboard/files">
+                <SignOutButton redirectUrl="/">
                     <Button className="max-sm:text-sm">Sign out</Button>
                 </SignOutButton>
             </SignedIn>
