@@ -5,6 +5,8 @@ import { Inter } from "next/font/google";
 
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
+import Header from "./header";
+import { Footer } from "./footer";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -24,7 +26,15 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <ConvexClientProvider>
-          {children}
+          <header>
+            <Header />
+          </header>
+          <main>
+            {children}
+          </main>
+          <footer>
+            <Footer />
+          </footer>
           <Toaster />
         </ConvexClientProvider>
       </body>

@@ -74,7 +74,7 @@ export default function FileBrowser(
   return (<div className="w-full" >
     {!user.isSignedIn ?
       (
-        <div className="text-center text-5xl font-bold">
+        <div className="w-fit absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 max-md:text-xl text-5xl font-bold">
           Sigin to continue
         </div>
 
